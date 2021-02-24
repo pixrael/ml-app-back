@@ -1,8 +1,15 @@
 const express = require('express');
+const fetch = require('node-fetch');
 var fs = require("fs");
 
 const app = express();
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+  });
 const port = 5000;
+
 
 app.use(express.static(__dirname + '/public'));
 
@@ -31,6 +38,19 @@ app.get('/items/:id', (req, res) => {
         res.end();
     });
 });
+
+app.get('/api/items/search', async (request, response) => {
+    console.log('query ', request.query.q);
+    console.log('req ', `https://api.mercadolibre.com/sites/MLA/search?q=${request.query.q}`);
+    const url =  `https://api.mercadolibre.com/sites/MLA/search?q=${request.query.q}`;
+
+    const fetch_response = await fetch(url);
+    const json = await fetch_response.json();
+    response.json(json);
+});
+
+
+
 
 
 app.listen(port, () => {
