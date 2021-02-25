@@ -3,13 +3,7 @@ const fetch = require('node-fetch');
 var fs = require("fs");
 
 const app = express();
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-  });
 const port = 5000;
-
 
 app.use(express.static(__dirname + '/public'));
 
@@ -40,19 +34,65 @@ app.get('/items/:id', (req, res) => {
 });
 
 app.get('/api/items/search', async (request, response) => {
-    console.log('query ', request.query.q);
-    console.log('req ', `https://api.mercadolibre.com/sites/MLA/search?q=${request.query.q}`);
-    const url =  `https://api.mercadolibre.com/sites/MLA/search?q=${request.query.q}`;
+    const productListUrl = `https://api.mercadolibre.com/sites/MLA/search?q=${request.query.q}`;
+    const productListResponse = await fetch(productListUrl);
+    const productListJson = await productListResponse.json();
 
-    const fetch_response = await fetch(url);
-    const json = await fetch_response.json();
-    response.json(json);
+    const mostRepeatedCategoryId = calculateMostRepeatedCategory(productListJson.results);
+
+    const categorytUrl = `https://api.mercadolibre.com/categories/${mostRepeatedCategoryId}`;
+    const categoryDataResponse = await fetch(categorytUrl);
+    const categoryDataJson = await categoryDataResponse.json();
+
+
+    productListJson['most_repeated_category_data'] = categoryDataJson;
+
+    response.json(productListJson);
 });
-
-
-
 
 
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`)
+    console.log(`Listening at http://localhost:${port}`)
 });
+
+function calculateMostRepeatedCategory(results) {
+
+    const categoriesId = calculateRepetitions(results);
+
+    const mostRepeatedCategoryId = calculateMostRepeatedCategoryId(categoriesId);
+
+    return mostRepeatedCategoryId;
+}
+
+function calculateRepetitions(results) {
+    const categoriesId = {};
+    results.map(result => {
+
+        if (!categoriesId[result.category_id]) {
+            categoriesId[result.category_id] = 1;
+
+        } else {
+            categoriesId[result.category_id]++;
+        }
+    });
+
+    return categoriesId;
+}
+
+function calculateMostRepeatedCategoryId(categoriesId) {
+
+    const values = Object.values(categoriesId);
+
+    let currentMax = -1;
+    let iMax = -1;
+    for (let i = 0; i < values.length; i++) {
+        if (values[i] > currentMax) {
+            currentMax = values[i];
+            iMax = i;
+        }
+    }
+
+    const mostRepeatedCategoryId = Object.keys(categoriesId)[iMax];
+
+    return mostRepeatedCategoryId;
+}
