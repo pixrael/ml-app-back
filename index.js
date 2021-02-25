@@ -51,6 +51,32 @@ app.get('/api/items/search', async (request, response) => {
 });
 
 
+app.get('/api/items/:id', async (request, response) => {
+
+    const productId = request.params.id;
+    const detailsProductUrl = `https://api.mercadolibre.com/items/${productId}`;
+    const detailsProductResponse = await fetch(detailsProductUrl);
+    const detailsProductJson = await detailsProductResponse.json();
+
+    const categoryId = detailsProductJson.category_id;
+
+    const categorytUrl = `https://api.mercadolibre.com/categories/${categoryId}`;
+    const categoryDataResponse = await fetch(categorytUrl);
+    const categoryDataJson = await categoryDataResponse.json();
+
+    detailsProductJson['category_data'] = { is_most_repeated_category: false, data: categoryDataJson };
+
+    const descriptiontUrl = `https://api.mercadolibre.com/items/${productId}/description`;
+    const descriptionDataResponse = await fetch(descriptiontUrl);
+    const descriptionDataJson = await descriptionDataResponse.json();
+
+    detailsProductJson['description_data'] = descriptionDataJson;
+
+
+    response.json(detailsProductJson);
+});
+
+
 app.listen(port, () => {
     console.log(`Listening at http://localhost:${port}`)
 });
