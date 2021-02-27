@@ -7,31 +7,19 @@ const port = 5000;
 
 app.use(express.static(__dirname + '/public'));
 
-app.get('/', (req, res) => {
+const cb = (req, res) => {
     fs.readFile("./public/views/index.html", function (err, data) {
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.write(data);
         res.end();
     });
-});
+};
 
-app.get('/items', (req, res) => {
-    fs.readFile("./public/views/index.html", function (err, data) {
-        console.log('search ', req.query.search);
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.write(data);
-        res.end();
-    });
-});
+app.get('/', cb);
 
-app.get('/items/:id', (req, res) => {
-    fs.readFile("./public/views/index.html", function (err, data) {
-        console.log('search ', req.params.id);
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.write(data);
-        res.end();
-    });
-});
+app.get('/items', cb);
+
+app.get('/items/:id',cb);
 
 app.get('/api/items/search', async (request, response) => {
     const productListUrl = `https://api.mercadolibre.com/sites/MLA/search?q=${request.query.q}`;
@@ -44,7 +32,6 @@ app.get('/api/items/search', async (request, response) => {
     const categoryDataResponse = await fetch(categorytUrl);
     const categoryDataJson = await categoryDataResponse.json();
 
-
     productListJson['most_repeated_category_data'] = categoryDataJson;
 
     response.json(productListJson);
@@ -52,7 +39,6 @@ app.get('/api/items/search', async (request, response) => {
 
 
 app.get('/api/items/:id', async (request, response) => {
-
     const productId = request.params.id;
     const detailsProductUrl = `https://api.mercadolibre.com/items/${productId}`;
     const detailsProductResponse = await fetch(detailsProductUrl);
