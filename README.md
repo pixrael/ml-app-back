@@ -9,5 +9,5 @@ How to run locally:
 - 2-Download the current repository.
 - 3-In the folder of the downlaoded project run the command "npm install".
 - 4-Run the command "run nodemon".
-- Visit https://localhost:5000 from browser.
-- -Use the application
+- 5-Visit https://localhost:5000 from browser.
+- 6-Use the application
