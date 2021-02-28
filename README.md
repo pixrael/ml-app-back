@@ -5,5 +5,9 @@
 * Technologies: express 4.x.x
 
 How to run locally:
-- 1-Download the current repository.
-- 2-Run the command "run nodemon".
+- 1-Install Nodejs 
+- 2-Download the current repository.
+- 3-In the folder of the downlaoded project run the command "npm install".
+- 4-Run the command "run nodemon".
+- Visit https://localhost:5000 from browser.
+- -Use the application
